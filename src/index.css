@@ -1,0 +1,208 @@
+:root {
+  /* Primary Theme Colors */
+  --color-primary: #6366f1;
+  --color-primary-dark: #4f46e5;
+  --color-secondary: #4b5563;
+  --color-background: #f9fafb;
+  --color-surface: #ffffff;
+  --color-error: #b91c1c;
+  --color-error-bg: #fee2e2;
+
+  /* Typography */
+  --font-family-base: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-size-base: 1rem;
+  --font-size-sm: 0.875rem;
+  --font-size-lg: 1.25rem;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.75rem;
+
+  /* Box Shadow */
+  --box-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                   0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --box-shadow-focus: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+
+
+/* Auth Page Container */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-background);
+  font-family: var(--font-family-base);
+}
+
+/* Card Styling */
+.auth-card {
+  width: 100%;
+  max-width: 28rem;
+  padding: 2rem;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--box-shadow-md);
+}
+
+/* Header Text */
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-title {
+  font-size: 1.875rem;
+  font-weight: var(--font-weight-bold);
+  color: #111827;
+}
+
+.auth-subtitle {
+  margin-top: 0.5rem;
+  color: var(--color-secondary);
+}
+
+/* Error Message */
+.auth-error {
+  padding: 0.75rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  background-color: var(--color-error-bg);
+  border-radius: var(--radius-sm);
+  margin-bottom: 1rem;
+}
+
+/* Form Elements */
+.auth-form {
+  margin-top: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.form-input {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Password Input and Show Button Wrapper */
+.password-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.password-wrapper .form-input {
+  flex: 1;
+  padding-right: 4rem;
+}
+
+/* Show/Hide Password Button */
+.show-password-btn {
+  position: absolute;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--color-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.show-password-btn:hover {
+  color: #111827;
+}
+
+/* Submit Button */
+.submit-btn {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: white;
+  background-color: var(--color-primary);
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.submit-btn:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.submit-btn:focus {
+  outline: none;
+  box-shadow: var(--box-shadow-focus);
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Toggle Link */
+.auth-toggle {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-secondary);
+  margin-top: 1rem;
+}
+
+.toggle-link {
+  margin-left: 0.25rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: color 0.15s ease-in-out;
+}
+
+.toggle-link:hover {
+  color: var(--color-primary-dark);
+}
+
+.toggle-link:focus {
+  outline: none;
+  text-decoration: underline;
+}
