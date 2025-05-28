@@ -7,10 +7,12 @@ const mongoose = require('mongoose');
 const Device = require('./devicesSchema');
 
 const app = express();
+const PORT = 5000;
+
 app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-const PORT = 5000;
 
 // PostgreSQL connection
 const pool = new Pool({
@@ -124,38 +126,39 @@ app.post('/login', async (req, res) => {
 
 // forgot password
 app.put('/forgot-pwd', async (req, res) => {
+  console.log("📩 Received PUT /forgot-pwd");
   const { username, email, password } = req.body;
+  console.log(`Username: ${username}, Email: ${email}`);
 
-  console.log(`📝 ${username} requested Forgot Password`);
-  
-  try{
-    const userExists = await pool.query(
-      'SELECT * FROM users WHERE username = $1 or email = $2',
+  try {
+    const userResult = await pool.query(
+      'SELECT * FROM users WHERE username = $1 OR email = $2',
       [username, email]
     );
-    
-    if (userExists.rows.length > 0) {
-      console.log(`✅ ${username || email} exists`);
 
-      const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash(password, salt);
-
-      const updatePwd = await pool.query(
-        'UPDATE users SET password_hash = $1 WHERE username = $2 OR email = $3',
-        [passwordHash, username, email]
-      );
-      console.log(`✅ Password changed successfully for ${username || email}\n`);
-      res.status(201).json({ message: `✅ Password changed succesfully` });
-    
-    } else {
-      console.log(`❌ ${username || email} does not exist`);
+    if (userResult.rows.length === 0) {
+      console.log("❌ User not found");
+      return res.status(404).json({ error: 'User not found' });
     }
 
-  } catch(error) {
-    console.error(`⚠️ Password change error:\n${error}\n`);
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    await pool.query(
+      'UPDATE users SET password_hash = $1 WHERE username = $2 OR email = $3',
+      [passwordHash, username, email]
+    );
+
+    console.log("✅ Password updated");
+    res.status(200).json({ message: 'Password updated successfully' });
+
+  } catch (error) {
+    console.error("⚠️ Internal server error:", error.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
 
 // Admin middleware
 const requireAdmin = async (req, res, next) => {

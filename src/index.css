@@ -1,12 +1,12 @@
 :root {
   /* Primary Theme Colors */
-  --color-primary: #6366f1;
-  --color-primary-dark: #4f46e5;
-  --color-secondary: #4b5563;
-  --color-background: #f9fafb;
-  --color-surface: #ffffff;
-  --color-error: #b91c1c;
-  --color-error-bg: #fee2e2;
+  --color-primary: #14b8a6;         /* Turquoise */
+  --color-primary-dark: #0f766e;    /* Dark Turquoise */
+  --color-secondary: #64748b;       /* Cool Slate Gray */
+  --color-background: #ecfdf5;      /* Minty White */
+  --color-surface: #ffffff;         /* Surface: White */
+  --color-error: #e11d48;           /* Rose Red */
+  --color-error-bg: #ffe4e6;        /* Soft Red Background */
 
   /* Typography */
   --font-family-base: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -22,10 +22,11 @@
   --radius-md: 0.75rem;
 
   /* Box Shadow */
-  --box-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-                   0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --box-shadow-focus: 0 0 0 3px rgba(99, 102, 241, 0.3);
+  --box-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07),
+                   0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --box-shadow-focus: 0 0 0 3px rgba(20, 184, 166, 0.4); /* Turquoise Focus */
 }
+
 
 .navbar {
   display: flex;
@@ -247,156 +248,107 @@
   margin-right: 0.5rem;
 }
 
-.forgot-password {
-  color: var(--color-primary-dark);
-  font-size: 0.9rem;
-  margin-top: -8px;
-  margin-bottom: 16px;
-  display: inline-block;
-}
-
-.forgot-password:hover {
-  cursor: pointer;
-}
-
-.forgot-pwd {
-  max-width: 26rem;
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: var(--color-surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--box-shadow-md);
-  font-family: var(--font-family-base);
-}
-
-.forgot-pwd h3 {
-  font-size: 1.5rem;
-  font-weight: var(--font-weight-bold);
-  text-align: center;
-  color: #111827;
-  margin-bottom: 1.5rem;
-}
-
-.forgot-pwd form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.forgot-pwd input {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-base);
-  font-family: inherit;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-
-.forgot-pwd input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: var(--box-shadow-focus);
-}
-
-.forgot-pwd button {
-  padding: 0.5rem 1rem;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.forgot-pwd button[type="submit"] {
-  background-color: var(--color-primary);
-  color: white;
-}
-
-.forgot-pwd button[type="submit"]:hover {
-  background-color: var(--color-primary-dark);
-}
-
-.forgot-pwd button[type="button"] {
-  background-color: #e5e7eb;
-  color: var(--color-secondary);
-}
-
-.forgot-pwd button[type="button"]:hover {
-  background-color: #d1d5db;
-}
-
-.modal-overlay {
+/* Forgot Password Modal */
+.forgot-pwd-modal {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent dark backdrop */
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
 }
 
-.modal-content {
+.forgot-pwd-content {
   background-color: var(--color-surface);
-  padding: 2rem;
   border-radius: var(--radius-md);
-  box-shadow: var(--box-shadow-lg);
-  width: 90%;
+  box-shadow: var(--box-shadow-md);
+  width: 100%;
   max-width: 400px;
-  animation: fadeIn 0.3s ease;
-  font-family: var(--font-family-base);
+  padding: 2rem;
+  margin: 1rem;
 }
 
-.modal-content h3 {
+.forgot-pwd-title {
   font-size: 1.5rem;
-  margin-bottom: 1rem;
-  text-align: center;
+  font-weight: var(--font-weight-bold);
   color: #111827;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
 
-.modal-content form {
+.forgot-pwd-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.modal-content input {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #ccc;
+.forgot-pwd-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
   border-radius: var(--radius-sm);
   font-size: var(--font-size-base);
+  transition: border-color 0.2s ease;
 }
 
-.modal-content button {
-  padding: 0.5rem 1rem;
-  font-size: var(--font-size-sm);
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
+.forgot-pwd-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
 }
 
-.modal-content button[type='submit'] {
+.forgot-pwd-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.forgot-pwd-submit-btn {
+  flex: 1;
+  padding: 0.75rem;
   background-color: var(--color-primary);
   color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-.modal-content button[type='button'] {
-  background-color: #f3f4f6;
+.forgot-pwd-submit-btn:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.forgot-pwd-cancel-btn {
+  flex: 1;
+  padding: 0.75rem;
+  background-color: transparent;
   color: var(--color-secondary);
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.forgot-pwd-cancel-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.forgot-password {
+  color: var(--color-primary-dark);
+  font-size: 0.9rem;
+  margin-top: -8px;       /* Pulls it up slightly */
+  margin-bottom: 16px;    /* Adds space below */
+  display: inline-block;  /* Ensures margin-top/bottom works as expected */
+}
+
+.forgot-password:hover {
+  cursor: pointer;
 }
 
 
