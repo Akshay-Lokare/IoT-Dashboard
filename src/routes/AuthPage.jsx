@@ -4,16 +4,20 @@ import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import ForgotPwdForm from '../components/forgotPwd';
+
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
+    is_admin: false,
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
+  const [forgotPwd, setForgotPwd] = useState(false);
 
   const navigate = useNavigate();
   const API_URL = 'http://localhost:5000';
@@ -34,7 +38,7 @@ export default function AuthPage() {
     try {
       const endpoint = isLogin ? '/login' : '/sign-up';
       const payload = isLogin
-        ? { username: formData.username, email: formData.email }
+        ? { username: formData.username, email: formData.email, password: formData.password, is_admin: formData.is_admin }
         : formData;
 
       console.log(`📡 Sending request to: ${API_URL}${endpoint}`);
@@ -44,15 +48,30 @@ export default function AuthPage() {
       console.log(`✅ Response received:\n`, response.data);
 
       if (isLogin) {
+          
+        const userData = response.data.user;
+        
+        setFormData((prev) => ({
+            ...prev,
+            username: userData.username,
+            email: userData.email,
+            password: userData.password,
+            is_admin: userData.is_admin,
+        }));
+
         console.log('🔐 Login success!');
         localStorage.setItem('user', JSON.stringify(response.data.user));
         console.log(`📦 User saved to localStorage:\n`, response.data.user);
+
         toast.success('✅ Login successful!');
+        
         console.log(`📍 Redirecting to: ${response.data.user.is_admin ? '/admin' : '/home'}`);
         navigate(response.data.user.is_admin ? '/admin' : '/home');
+
       } else {
         toast.success('🎉 Account created! Please log in.');
         console.log('🎉 Sign-up success! Switching to Login mode.');
+
         setIsLogin(true);
       }
     } catch (err) {
@@ -139,6 +158,13 @@ export default function AuthPage() {
               </button>
             </div>
           </div>
+
+          {isLogin ? (
+            <>
+           <span className='forgot-password' onClick={() => setForgotPwd(true)}>Forgot Password?</span>
+           {forgotPwd && <ForgotPwdForm onClose={() => setForgotPwd(false)} />}
+            </>
+          ) : ''}
 
           <button
             type="submit"

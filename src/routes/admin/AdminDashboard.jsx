@@ -43,13 +43,13 @@ export default function AdminDashboard() {
 
             <table className='admin-dashboard-table'>
             
-            <thread>
+            <thead>
                 <tr>
                     <th>Username</th>
                     <th>Email</th>
                     <th>Password</th>
                 </tr>
-            </thread>
+            </thead>
 
             <tbody>
                 {users.map(user => (

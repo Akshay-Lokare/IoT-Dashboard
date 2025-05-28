@@ -1,9 +1,17 @@
-import React from 'react'
+import React from 'react';
+
+import Navbar from '../components/navbar';
+import DeviceTable from '../components/deviceTable';
 
 export default function Home() {
   return (
     <div className='home-page'>
-        <h3>Home Page</h3>
+      <Navbar />
+
+      <h1>Welcome to the Cafe App</h1>
+      <p>This is the Home page. Enjoy your stay!</p>
+      
+      <DeviceTable />
     </div>
   )
 }

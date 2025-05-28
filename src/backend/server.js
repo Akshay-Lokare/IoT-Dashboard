@@ -2,6 +2,9 @@ const express = require('express');
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
+const mongoose = require('mongoose');
+
+const Device = require('./devicesSchema');
 
 const app = express();
 app.use(express.json());
@@ -18,11 +21,22 @@ const pool = new Pool({
   port: 5432,
 });
 
+// MongoDB connection
+mongoose.connect('mongodb://localhost:27017/iot-devices');
+
+const mongoDB = mongoose.connection;
+mongoDB.on('error', console.error.bind(console, '❌ MongoDB connection error:'));
+mongoDB.once('open', () => {
+  console.log('✅ MongoDB connection success');
+});
+
+
 // Test Postgres connection
 pool.query('SELECT NOW()', (err, res) => {
   if (err) console.error(`❌ Postgres Connection Error: ${err.stack}`);
   else console.log(`✅ Postgres Connection Success\n`);
 });
+
 
 // Sign-up route
 app.post('/sign-up', async (req, res) => {
@@ -108,6 +122,41 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// forgot password
+app.put('/forgot-pwd', async (req, res) => {
+  const { username, email, password } = req.body;
+
+  console.log(`📝 ${username} requested Forgot Password`);
+  
+  try{
+    const userExists = await pool.query(
+      'SELECT * FROM users WHERE username = $1 or email = $2',
+      [username, email]
+    );
+    
+    if (userExists.rows.length > 0) {
+      console.log(`✅ ${username || email} exists`);
+
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(password, salt);
+
+      const updatePwd = await pool.query(
+        'UPDATE users SET password_hash = $1 WHERE username = $2 OR email = $3',
+        [passwordHash, username, email]
+      );
+      console.log(`✅ Password changed successfully for ${username || email}\n`);
+      res.status(201).json({ message: `✅ Password changed succesfully` });
+    
+    } else {
+      console.log(`❌ ${username || email} does not exist`);
+    }
+
+  } catch(error) {
+    console.error(`⚠️ Password change error:\n${error}\n`);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Admin middleware
 const requireAdmin = async (req, res, next) => {
   const { userId } = req.body;
@@ -148,6 +197,87 @@ app.post('/admin/toggle-user', requireAdmin, async (req, res) => {
     console.error(`⚠️ Toggle user error:\n${error}\n`);
     res.status(500).json({ error: 'Internal server error' });
   }
+});
+
+// Add a new IoT device
+app.post('/add-device', async (req, res) => {
+  const {
+    name,
+    creatorId,
+    locationTags,
+    device_type,
+    record_type,
+    payload,
+    fcount,
+  } = req.body;
+
+  console.log(`📡 Add Device Request from ${creatorId} for device "${name}"\n`);
+
+  try {
+    const newDevice = new Device({
+      deveui,
+      creatorId,
+      locationTags: locationTags || [],
+      device_type,
+      record_type,
+      payload,
+      fcount: fcount || 0
+    });
+
+    await newDevice.save();
+    console.log(`✅ Device "${deveui}" added by ${creatorId}\n`);
+
+    res.status(201).json({ message: 'Device added successfully', device: newDevice });
+  } catch (error) {
+    console.error(`⚠️ Add Device Error:\n${error}\n`);
+    res.status(500).json({ error: 'Failed to add device' });
+  }
+});
+
+app.get('/devices', async (req, res) => {
+  try {
+    const devices = await Device.find();
+    console.log(`📦 Retrieved ${devices.length} devices\n`);
+    res.status(200).json(devices);
+
+  } catch (error) {
+    console.error(`⚠️ Fetch All Devices Error:\n${error}\n`);
+    res.status(500).json({ error: 'Failed to fetch devices' });
+  }
+});
+
+app.get('admin/devices/:creatorId', async (req, res) => {
+  const { creatorId } = req.params;
+
+  try {
+    const devices = await Device.find({ creatorId });
+    console.log(`📥 Found ${devices.length} devices for creator: ${creatorId}\n`);
+    res.status(200).json(devices);
+
+  } catch (error) {
+    console.error(`⚠️ Fetch Devices by Creator Error:\n${error}\n`);
+    res.status(500).json({ error: 'Failed to fetch user devices' });
+  }
+});
+
+app.get('/device/:id', async(req, res) => {
+  const { id } = req.params;
+
+  try {
+    const device = await Device.findById({ id });
+
+    if (!device) {
+      return res.status(404).json({ error: 'Device not found' });
+    }
+
+    console.log(`🔍 Found device with ID: ${id}\n`);
+    res.status(200).json(device);
+
+  } catch (error) {
+    console.error(`⚠️ Fetch Device by ID Error:\n${error}\n`);
+    res.status(500).json({ error: 'Failed to fetch device' });
+  }
+
 });
 
 app.listen(PORT, () => {
