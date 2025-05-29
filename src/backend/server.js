@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
-const Device = require('./devicesSchema');
+const DeviceDC = require('./addDevicesSchema');
 
 const app = express();
 const PORT = 5000;
@@ -24,7 +24,7 @@ const pool = new Pool({
 });
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/iot-devices');
+mongoose.connect('mongodb://localhost:27017/iot-DC');
 
 const mongoDB = mongoose.connection;
 mongoDB.on('error', console.error.bind(console, '❌ MongoDB connection error:'));
@@ -159,7 +159,6 @@ app.put('/forgot-pwd', async (req, res) => {
 });
 
 
-
 // Admin middleware
 const requireAdmin = async (req, res, next) => {
   const { userId } = req.body;
@@ -202,29 +201,26 @@ app.post('/admin/toggle-user', requireAdmin, async (req, res) => {
   }
 });
 
+
 // Add a new IoT device
 app.post('/add-device', async (req, res) => {
   const {
-    name,
+    deveui,
     creatorId,
     locationTags,
     device_type,
     record_type,
-    payload,
-    fcount,
   } = req.body;
 
-  console.log(`📡 Add Device Request from ${creatorId} for device "${name}"\n`);
+  console.log(`📡 Add Device Request from ${creatorId} for device "${deveui}"\n`);
 
   try {
-    const newDevice = new Device({
+    const newDevice = new DeviceDC({
       deveui,
       creatorId,
       locationTags: locationTags || [],
       device_type,
       record_type,
-      payload,
-      fcount: fcount || 0
     });
 
     await newDevice.save();
@@ -239,7 +235,7 @@ app.post('/add-device', async (req, res) => {
 
 app.get('/devices', async (req, res) => {
   try {
-    const devices = await Device.find();
+    const devices = await DeviceDC.find();
     console.log(`📦 Retrieved ${devices.length} devices\n`);
     res.status(200).json(devices);
 
@@ -253,7 +249,7 @@ app.get('admin/devices/:creatorId', async (req, res) => {
   const { creatorId } = req.params;
 
   try {
-    const devices = await Device.find({ creatorId });
+    const devices = await DeviceDC.find({ creatorId });
     console.log(`📥 Found ${devices.length} devices for creator: ${creatorId}\n`);
     res.status(200).json(devices);
 
@@ -267,7 +263,7 @@ app.get('/device/:id', async(req, res) => {
   const { id } = req.params;
 
   try {
-    const device = await Device.findById({ id });
+    const device = await DeviceDC.findById({ id });
 
     if (!device) {
       return res.status(404).json({ error: 'Device not found' });
