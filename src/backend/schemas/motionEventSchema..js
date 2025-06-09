@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const deviceSchema = new mongoose.Schema({
+const motionEventSchema = new mongoose.Schema({
   deveui: {
     type: String,
     required: true,
@@ -22,15 +22,14 @@ const deviceSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  // Uncomment if needed:
-  // payload: {
-  //   type: String, // hexadecimal string from the device
-  //   required: true,
-  // },
-  // fcount: {
-  //   type: Number,
-  //   default: 0, // number of events triggered by the device
-  // },
+  payload: {
+    type: String, // hexadecimal string from the device
+    required: true,
+  },
+  fcount: {
+    type: Number,
+    default: 0, // number of events triggered by the device
+  },
   createDate: {
     type: Date,
     default: Date.now,
@@ -41,6 +40,6 @@ const deviceSchema = new mongoose.Schema({
   }
 });
 
-const DeviceDC = mongoose.model('DeviceDC', deviceSchema);
+const motionEvent = mongoose.model('motionEvent', motionEventSchema);
 
-module.exports = DeviceDC;
+module.exports = motionEvent;

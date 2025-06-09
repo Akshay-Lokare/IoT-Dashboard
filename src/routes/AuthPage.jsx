@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useDispatch } from 'react-redux';
 
 import ForgotPwdForm from '../components/forgotPwd';
+import { setUserFromServer } from '../redux/userSlice';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -21,6 +23,8 @@ export default function AuthPage() {
 
   const navigate = useNavigate();
   const API_URL = 'http://localhost:5000';
+
+  const dispatch = useDispatch();
 
   const handleChange = (e) => {
     setFormData({
@@ -62,6 +66,7 @@ export default function AuthPage() {
         console.log('🔐 Login success!');
         localStorage.setItem('user', JSON.stringify(response.data.user));
         console.log(`📦 User saved to localStorage:\n`, response.data.user);
+        dispatch(setUserFromServer(userData)); // To save the data in redux
 
         toast.success('✅ Login successful!');
         

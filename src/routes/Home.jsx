@@ -8,7 +8,7 @@ export default function Home() {
     <div className='home-page'>
       <Navbar />
 
-      <h1>Welcome to the Cafe App</h1>
+      <h1>Welcome to the IoT Dashboard App</h1>
       <p>This is the Home page. Enjoy your stay!</p>
       
       <DeviceTable />

@@ -3,8 +3,13 @@ const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 
-const DeviceDC = require('./addDevicesSchema');
+
+const DeviceDC = require('./schemas/addDevicesSchema');
+const motionEvent = require('./schemas/motionEventSchema.');
+
+const { createInitialMotionEvent } = require('../helpers/motionPayload.');
 
 const app = express();
 const PORT = 5000;
@@ -12,6 +17,7 @@ const PORT = 5000;
 app.use(express.json());
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.json());
 
 
 // PostgreSQL connection
@@ -245,6 +251,20 @@ app.get('/devices', async (req, res) => {
   }
 });
 
+app.get('/user-devices', async (req, res) => {
+  const { email } = req.query;
+  try {
+    const devices = await DeviceDC.find({ creatorId: email });
+    console.log(`📦 Retrieved ${devices.length} devices\n`);
+    res.status(200).json(devices);  
+
+  } catch (error) {
+    console.error(`⚠️ Fetch All Devices Error:\n${error}\n`);
+    res.status(500).json({ error: 'Failed to fetch devices' });
+  }
+});
+
+
 app.get('admin/devices/:creatorId', async (req, res) => {
   const { creatorId } = req.params;
 
@@ -276,7 +296,47 @@ app.get('/device/:id', async(req, res) => {
     console.error(`⚠️ Fetch Device by ID Error:\n${error}\n`);
     res.status(500).json({ error: 'Failed to fetch device' });
   }
+});
 
+app.get('/create-data', async (req, res) => {
+  const payload = createInitialMotionEvent();
+  res.json({ payload });
+});
+
+app.post('/:type/create-data', async (req, res) => {
+  const {
+    deveui,
+    creatorId,
+    locationTags,
+    device_type,
+    record_type,
+    payload,
+    fcount,
+    createDate,
+    updateDate
+  } = req.body;
+
+  try {
+    const motionData = new motionEvent({
+      deveui,
+      creatorId,
+      locationTags: locationTags || [],
+      device_type,
+      record_type,
+      payload,
+      fcount,
+      createDate,
+      updateDate
+    });``
+
+    await motionData.save();
+    console.log(`✅ Motion Data created by ${creatorId}\n`);
+    res.status(201).json({ message: 'Motion data saved successfully!', device: newDevice });
+
+  } catch (error) {
+    console.error(`⚠️ Motion event Error:\n${error}\n`);
+    res.status(500).json({ error: 'Failed to save motion event' });
+  }
 });
 
 app.listen(PORT, () => {

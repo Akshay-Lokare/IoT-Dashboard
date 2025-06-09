@@ -1,12 +1,12 @@
 :root {
   /* Primary Theme Colors */
-  --color-primary: #14b8a6;         /* Turquoise */
-  --color-primary-dark: #0f766e;    /* Dark Turquoise */
-  --color-secondary: #64748b;       /* Cool Slate Gray */
-  --color-background: #ecfdf5;      /* Minty White */
-  --color-surface: #ffffff;         /* Surface: White */
-  --color-error: #e11d48;           /* Rose Red */
-  --color-error-bg: #ffe4e6;        /* Soft Red Background */
+  --color-primary: #14b8a6;         
+  --color-primary-dark: #0f766e;    
+  --color-secondary: #64748b;       
+  --color-background: #ecfdf5;      
+  --color-surface: #ffffff;         
+  --color-error: #e11d48;           
+  --color-error-bg: #ffe4e6;        
 
   /* Typography */
   --font-family-base: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -24,7 +24,7 @@
   /* Box Shadow */
   --box-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07),
                    0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  --box-shadow-focus: 0 0 0 3px rgba(20, 184, 166, 0.4); /* Turquoise Focus */
+  --box-shadow-focus: 0 0 0 3px rgba(20, 184, 166, 0.4); 
 }
 
 
@@ -51,7 +51,7 @@
 }
 
 .navbar-logo a {
-  font-size: 1.75rem; /* larger font */
+  font-size: 2.75rem; /* larger font */
   font-weight: var(--font-weight-bold);
   color: var(--color-primary);
   text-decoration: none;
@@ -439,6 +439,7 @@
   min-height: 100vh;
   padding: 2rem;
   color: #111827;
+  margin-top: -35px;
 }
 
 .add-device-h3 {
@@ -522,4 +523,65 @@
 
 .btn-red:hover {
   background-color: #b91c1c;
+}
+
+.profile-container {
+  font-family: 'Inter', sans-serif;
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-title {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  font-weight: 600;
+  color: #0f172a;
+  text-align: center;
+}
+
+.profile-details {
+  border: 1px solid #e5e7eb;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  border-radius: 0.75rem;
+  background-color: #f0fdf4;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #1f2937;
+  min-width: 500px;
+  text-align: center;
+}
+
+
+.not-found-container {
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #111827;
+  min-height: calc(100vh - 60px); /* Adjust based on Navbar height */
+}
+
+.not-found-container h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ef4444;
+  margin-bottom: 1rem;
+}
+
+.not-found-container p {
+  font-size: 1.125rem;
+  color: #374151;
+}
+
+.not-found-container a {
+  color: #14b8a6;
+  font-weight: 500;
+  text-decoration: none;
+  margin-left: 0.5rem;
+}
+
+.not-found-container a:hover {
+  text-decoration: underline;
 }
