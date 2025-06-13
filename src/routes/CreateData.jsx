@@ -3,6 +3,7 @@ import Navbar from '../components/navbar'
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
+import { createInitialMotionEvent } from '../components/motionPayload';
 
 export default function CreateData() {
 
@@ -11,22 +12,57 @@ export default function CreateData() {
   const [payload, setPayload] = useState('');
   const [allDevices, setAllDevices] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState('');
+  const [motionCount, setMotionCount] = useState(0);
+  const [battery, setBattery] = useState(100);
 
   const handlePayloadCreation = async () => {
     try {
-        const response = await fetch('http://localhost:5000/create-data');
-        const data = await response.json();
-        setPayload(data.payload);
+      // 1. Get payload
+      const response = await fetch('http://localhost:5000/create-data');
+      const data = await response.json();
+      setPayload(data.payload);
 
-        if (data.payload) {
-          toast.success('Payload generated successfully!');
+      if (data.payload) {
+        toast.success('Payload generated successfully!');
+
+        // 2. Find selected device details
+        const selected = allDevices.find((d) => d._id === selectedDevice);
+        if (!selected) {
+          toast.error("Device not found");
+          return;
         }
 
+        // 3. POST payload and metadata to backend
+        await axios.post(`http://localhost:5000/motion/create-data`, {
+          deveui: selected.deveui,
+          creatorId: user.email,
+          locationTags: selected.locationTags,
+          device_type: selected.device_type,
+          record_type: selected.record_type,
+          payload: data.payload,
+          fcount: 1, // or however you're tracking it
+        });
+
+        // Simulate motionCount increment and battery drain
+        const newCount = motionCount + 1;
+        const newBattery = Math.max(0, battery - 1);  // prevent negative battery
+
+        // Now generate new payload with updated values
+        const updatedPayload = createInitialMotionEvent(newCount, newBattery);
+
+        setMotionCount(newCount);
+        setBattery(newBattery);
+        setPayload(updatedPayload);
+
+        toast.success("✅ Data saved to database!");
+      }
+
     } catch (error) {
-        console.error('❌ Error creating payload:', error);
-        toast.error('Error generating payload');
-    }
+      console.error('❌ Error creating payload:', error);
+      toast.error('Error generating or saving payload');
+    } 
   };
+
 
   useEffect(() => {
     const fetchAllDevices = async () => {
@@ -71,6 +107,10 @@ export default function CreateData() {
 
 
         <p>email: {user.email}</p>
+        <button onClick={handlePayloadCreation} disabled={!selectedDevice}> Generate </button>
+
+
+        <p>Payload - {payload || 'null'}</p>
 
         </form>
 

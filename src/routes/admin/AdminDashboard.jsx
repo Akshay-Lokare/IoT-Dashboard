@@ -1,72 +1,98 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import Navbar from '../../components/navbar';
 
 export default function AdminDashboard() {
-
     const [users, setUsers] = useState([]);
+    const [adminEmail, setAdminEmail] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Load admin email from localStorage
+        const userData = JSON.parse(localStorage.getItem('user'));
+        setAdminEmail(userData?.email || '');
+
+        // Fetch users from backend
         const fetchUsers = async () => {
             try {
-                const user = JSON.parse(localStorage.getItem('user'));
-                if (!user?.is_admin) {
-                    navigate('/login');
-                    return;
-                }
-
-                const response = await axios.get('http://localhost:5000/admin/users');
+                const response = await axios.get('http://localhost:5000/admin/get-users');
                 setUsers(response.data);
-
             } catch (error) {
-                console.error(`❌ Failed to fetch users: ${err}`);
+                console.error('❌ Error fetching users:', error);
+                toast.error('Error fetching users');
             }
-        }
-        fetchUsers();
-    }, [navigate]);
+        };
 
-    const toggleUserStatus = async (userId) => {
+        fetchUsers();
+    }, []);
+
+    const toggleUserStatus = async (targetEmail) => {
+        if (!adminEmail) {
+            toast.error('Admin email not found');
+            return;
+        }
+
         try {
-        await axios.post('http://localhost:5000/admin/toggle-user', { userId });
-        setUsers(users.map(user => 
-            user.id === userId ? { ...user, is_active: !user.is_active } : user
-        ));
+            await axios.post('http://localhost:5000/admin/toggle-user', {
+                adminEmail,
+                targetEmail
+            });
+
+            setUsers(users.map(user =>
+                user.email === targetEmail ? { ...user, is_active: !user.is_active } : user
+            ));
+
+            toast.success('User status updated successfully');
         } catch (err) {
-        console.error('Toggle failed:', err);
+            console.error('Toggle failed:', err);
+            toast.error('Failed to update user status');
         }
     };
 
-  return (
-    <div className='admin-dashboard'>
-        <h1 className='admin-dashboard-header-1'>Admin Dashboard</h1>
+    return (
+        <div className='admin-dashboard'>
+            <Navbar />
 
-            <table className='admin-dashboard-table'>
-            
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Password</th>
-                </tr>
-            </thead>
+            <p><strong>Logged in as Admin:</strong> {adminEmail || 'Unknown'}</p>
 
-            <tbody>
-                {users.map(user => (
-                    <tr key={user.id}>
-                        <td>{user.username}</td>
-                        <td>{user.is_active ? '✅ Active' : '❌ Inactive'}</td>
+            <div className='admin-dashboard-container'>
 
-                        <td>
-                            <button onClick={() => toggleUserStatus(user.id)}>Toggle Status</button>
-                        </td>
-                    
-                    </tr>
-                ))}
-            </tbody>
+                <section className='admin-section'>
+                    <h2 className='admin-section-title'>User Management</h2>
 
-            </table>
-
-    </div>
-  )
+                    <div className='user-table-wrapper'>
+                        <table className='user-table'>
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Status</th>
+                                    <th>Email</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {users.map(user => (
+                                    <tr key={user.id}>
+                                        <td>{user.username || 'N/A'}</td>
+                                        <td>{user.is_active ? '✅ Active' : '❌ Inactive'}</td>
+                                        <td>{user.email || 'N/A'}</td>
+                                        <td>
+                                            <button
+                                                onClick={() => toggleUserStatus(user.email)}
+                                                className={`status-btn ${user.is_active ? 'btn-red' : 'btn-green'}`}
+                                            >
+                                                {user.is_active ? 'Deactivate' : 'Activate'}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    );
 }

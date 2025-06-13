@@ -1,24 +1,24 @@
 const express = require('express');
-const { Pool } = require('pg');
-const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcryptjs');
+const { Pool } = require('pg');
 
-
+// Schemas
 const DeviceDC = require('./schemas/addDevicesSchema');
-const motionEvent = require('./schemas/motionEventSchema.');
+const motionEvent = require('./schemas/motionEventSchema');
 
-const { createInitialMotionEvent } = require('../helpers/motionPayload.');
+// Motion payload generator
+const { createInitialMotionEvent } = require('../backend/motionPayload.cjs');
 
 const app = express();
 const PORT = 5000;
 
-app.use(express.json());
+// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
-
 
 // PostgreSQL connection
 const pool = new Pool({
@@ -29,24 +29,26 @@ const pool = new Pool({
   port: 5432,
 });
 
-// MongoDB connection
-mongoose.connect('mongodb://localhost:27017/iot-DC');
-
-const mongoDB = mongoose.connection;
-mongoDB.on('error', console.error.bind(console, '❌ MongoDB connection error:'));
-mongoDB.once('open', () => {
-  console.log('✅ MongoDB connection success');
-});
-
-
-// Test Postgres connection
 pool.query('SELECT NOW()', (err, res) => {
   if (err) console.error(`❌ Postgres Connection Error: ${err.stack}`);
   else console.log(`✅ Postgres Connection Success\n`);
 });
 
+// MongoDB connection
+mongoose.connect('mongodb://localhost:27017/iot-DC');
+const mongoDB = mongoose.connection;
 
-// Sign-up route
+mongoDB.on('error', console.error.bind(console, '❌ MongoDB connection error:'));
+mongoDB.once('open', () => {
+  console.log('✅ MongoDB connection success');
+});
+
+// Routes
+app.get('/', (req, res) => {
+  res.send('🚀 Server is running');
+});
+
+// Signup
 app.post('/sign-up', async (req, res) => {
   const { username, email, password } = req.body;
   console.log(`📝 Received sign-up request:\nUsername: ${username}\nEmail: ${email}\n`);
@@ -71,70 +73,76 @@ app.post('/sign-up', async (req, res) => {
     );
 
     console.log(`✅ User created successfully: ${username}\n`);
-    res.status(201).json({ message: `✅ User Successfully Created` });
+    res.status(201).json({ message: '✅ User Successfully Created' });
   } catch (error) {
     console.log(`⚠️ Signup Error:\n${error}\n`);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-// Login route
+// Login
 app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  console.log(`🔐 Login attempt:\nUsername: ${username}\n`);
+  const { email, password } = req.body; // Now expecting email instead of username
+  console.log(`🔐 Login attempt for email: ${email}`);
 
   try {
-    const userResult = await pool.query(
-      'SELECT * FROM users WHERE username = $1',
-      [username]
-    );
+    const userResult = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
 
     if (userResult.rows.length === 0) {
-      console.log(`❌ Login failed: User not found (${username})\n`);
-      return res.status(404).json({ error: 'User not found' });
+      console.log(`❌ Login failed: Email not found (${email})`);
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const user = userResult.rows[0];
 
     if (!user.is_active) {
-      console.log(`🚫 Login blocked: Inactive account (${username})\n`);
-      return res.status(403).json({ error: 'Account deactivated. Contact admin.' });
+      console.log(`🚫 Login blocked: Inactive account (${email})`);
+      return res.status(403).json({ 
+        error: 'Account deactivated. Please contact support.' 
+      });
+    }
+
+    // Check login attempts
+    if (user.login_attempts >= 5) {
+      return res.status(429).json({
+        error: 'Too many attempts. Account temporarily locked.'
+      });
     }
 
     const isPwdValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isPwdValid) {
-      console.log(`❌ Invalid password attempt for user: ${username}\n`);
+      console.log(`❌ Invalid password attempt for email: ${email}`);
       await pool.query(
-        'UPDATE users SET login_attempts = login_attempts + 1 WHERE id = $1',
+        'UPDATE users SET login_attempts = login_attempts + 1 WHERE id = $1', 
         [user.id]
       );
-      return res.status(401).json({ error: 'Invalid password' });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    // Reset attempts on successful login
     await pool.query(
-      'UPDATE users SET login_attempts = 0, last_login = NOW() WHERE id = $1',
+      'UPDATE users SET login_attempts = 0, last_login = NOW() WHERE id = $1', 
       [user.id]
     );
 
     const { password_hash, ...userData } = user;
 
-    console.log(`✅ Login success for user: ${username}\n`);
-    res.json({
-      message: 'Login Success',
-      user: userData
+    console.log(`✅ Login success for email: ${email}`);
+    res.json({ 
+      message: 'Login successful', 
+      user: userData 
     });
   } catch (error) {
-    console.error(`⚠️ Login error:\n${error}\n`);
+    console.error(`⚠️ Login error:`, error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// forgot password
+// Forgot password
 app.put('/forgot-pwd', async (req, res) => {
-  console.log("📩 Received PUT /forgot-pwd");
+  console.log('📩 Received PUT /forgot-pwd');
   const { username, email, password } = req.body;
-  console.log(`Username: ${username}, Email: ${email}`);
 
   try {
     const userResult = await pool.query(
@@ -143,7 +151,7 @@ app.put('/forgot-pwd', async (req, res) => {
     );
 
     if (userResult.rows.length === 0) {
-      console.log("❌ User not found");
+      console.log('❌ User not found');
       return res.status(404).json({ error: 'User not found' });
     }
 
@@ -155,70 +163,69 @@ app.put('/forgot-pwd', async (req, res) => {
       [passwordHash, username, email]
     );
 
-    console.log("✅ Password updated");
+    console.log('✅ Password updated');
     res.status(200).json({ message: 'Password updated successfully' });
-
   } catch (error) {
-    console.error("⚠️ Internal server error:", error.message);
+    console.error('⚠️ Internal server error:', error.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-
 // Admin middleware
 const requireAdmin = async (req, res, next) => {
-  const { userId } = req.body;
-  console.log(`🛡️ Admin check for userId: ${userId}\n`);
+  const { adminEmail } = req.body;
 
   try {
-    const userResult = await pool.query(
-      'SELECT * FROM users WHERE id = $1',
-      [userId]
-    );
+    const userResult = await pool.query('SELECT * FROM users WHERE email = $1', [adminEmail]);
+
     if (userResult.rows.length === 0 || !userResult.rows[0].is_admin) {
-      console.log(`🚫 Admin access denied for userId: ${userId}\n`);
       return res.status(403).json({ error: 'Admin access required' });
     }
 
-    console.log(`✅ Admin access granted for userId: ${userId}\n`);
     next();
   } catch (error) {
-    console.error(`⚠️ Admin check error:\n${error}\n`);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 // Admin toggle user activation
 app.post('/admin/toggle-user', requireAdmin, async (req, res) => {
-  const { userId } = req.body;
-  console.log(`🔄 Toggle activation for userId: ${userId}\n`);
+  const { targetEmail } = req.body;
 
   try {
-    await pool.query(
-      'UPDATE users SET is_active = NOT is_active WHERE id = $1',
-      [userId]
-    );
-
-    console.log(`✅ Toggled user activation status for userId: ${userId}\n`);
+    await pool.query('UPDATE users SET is_active = NOT is_active WHERE email = $1 RETURNING *', [targetEmail]);
     res.status(200).json({ message: 'User Updated' });
+
   } catch (error) {
-    console.error(`⚠️ Toggle user error:\n${error}\n`);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
+// Admin: get all users
+app.get('/admin/get-users', async (req, res) => {
+  try {
+    const users = await pool.query('SELECT * FROM users');
+    res.json(users.rows);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
-// Add a new IoT device
+// Admin: get all devices by creator
+app.get('/admin/devices/:creatorId', async (req, res) => {
+  const { creatorId } = req.params;
+
+  try {
+    const devices = await DeviceDC.find({ creatorId });
+    res.status(200).json(devices);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch user devices' });
+  }
+});
+
+// Add device
 app.post('/add-device', async (req, res) => {
-  const {
-    deveui,
-    creatorId,
-    locationTags,
-    device_type,
-    record_type,
-  } = req.body;
-
-  console.log(`📡 Add Device Request from ${creatorId} for device "${deveui}"\n`);
+  const { deveui, creatorId, locationTags, device_type, record_type } = req.body;
 
   try {
     const newDevice = new DeviceDC({
@@ -230,79 +237,58 @@ app.post('/add-device', async (req, res) => {
     });
 
     await newDevice.save();
-    console.log(`✅ Device "${deveui}" added by ${creatorId}\n`);
-
     res.status(201).json({ message: 'Device added successfully', device: newDevice });
   } catch (error) {
-    console.error(`⚠️ Add Device Error:\n${error}\n`);
     res.status(500).json({ error: 'Failed to add device' });
   }
 });
 
+// Get all devices
 app.get('/devices', async (req, res) => {
   try {
     const devices = await DeviceDC.find();
-    console.log(`📦 Retrieved ${devices.length} devices\n`);
     res.status(200).json(devices);
-
   } catch (error) {
-    console.error(`⚠️ Fetch All Devices Error:\n${error}\n`);
     res.status(500).json({ error: 'Failed to fetch devices' });
   }
 });
 
+// Get user devices by email
 app.get('/user-devices', async (req, res) => {
   const { email } = req.query;
+
   try {
     const devices = await DeviceDC.find({ creatorId: email });
-    console.log(`📦 Retrieved ${devices.length} devices\n`);
-    res.status(200).json(devices);  
-
+    res.status(200).json(devices);
   } catch (error) {
-    console.error(`⚠️ Fetch All Devices Error:\n${error}\n`);
     res.status(500).json({ error: 'Failed to fetch devices' });
   }
 });
 
-
-app.get('admin/devices/:creatorId', async (req, res) => {
-  const { creatorId } = req.params;
-
-  try {
-    const devices = await DeviceDC.find({ creatorId });
-    console.log(`📥 Found ${devices.length} devices for creator: ${creatorId}\n`);
-    res.status(200).json(devices);
-
-  } catch (error) {
-    console.error(`⚠️ Fetch Devices by Creator Error:\n${error}\n`);
-    res.status(500).json({ error: 'Failed to fetch user devices' });
-  }
-});
-
-app.get('/device/:id', async(req, res) => {
+// Get a single device by ID
+app.get('/device/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
-    const device = await DeviceDC.findById({ id });
+    const device = await DeviceDC.findById(id);
 
     if (!device) {
       return res.status(404).json({ error: 'Device not found' });
     }
 
-    console.log(`🔍 Found device with ID: ${id}\n`);
     res.status(200).json(device);
-
   } catch (error) {
-    console.error(`⚠️ Fetch Device by ID Error:\n${error}\n`);
     res.status(500).json({ error: 'Failed to fetch device' });
   }
 });
 
-app.get('/create-data', async (req, res) => {
+// Create test motion payload
+app.get('/create-data', (req, res) => {
   const payload = createInitialMotionEvent();
   res.json({ payload });
 });
 
+// Store motion data
 app.post('/:type/create-data', async (req, res) => {
   const {
     deveui,
@@ -313,7 +299,7 @@ app.post('/:type/create-data', async (req, res) => {
     payload,
     fcount,
     createDate,
-    updateDate
+    updateDate,
   } = req.body;
 
   try {
@@ -326,19 +312,17 @@ app.post('/:type/create-data', async (req, res) => {
       payload,
       fcount,
       createDate,
-      updateDate
-    });``
+      updateDate,
+    });
 
     await motionData.save();
-    console.log(`✅ Motion Data created by ${creatorId}\n`);
-    res.status(201).json({ message: 'Motion data saved successfully!', device: newDevice });
-
+    res.status(201).json({ message: 'Motion data saved successfully!', device: motionData });
   } catch (error) {
-    console.error(`⚠️ Motion event Error:\n${error}\n`);
     res.status(500).json({ error: 'Failed to save motion event' });
   }
 });
 
+// Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}\n`);
 });
