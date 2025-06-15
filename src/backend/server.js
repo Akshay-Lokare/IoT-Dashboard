@@ -212,14 +212,25 @@ app.get('/admin/get-users', async (req, res) => {
 });
 
 // Admin: get all devices by creator
-app.get('/admin/devices/:creatorId', async (req, res) => {
-  const { creatorId } = req.params;
+app.get('/admin/devices', async (req, res) => {
 
   try {
-    const devices = await DeviceDC.find({ creatorId });
+    const devices = await DeviceDC.find();
     res.status(200).json(devices);
+
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch user devices' });
+  }
+});
+
+// Admin: remove a device
+app.delete('/admin/delete-device', async (req, res) => {
+  const { deveui } = req.query;
+  try {
+    const deleteDevice = await DeviceDC.deleteOne({ deveui: deveui })
+    res.status(200).json({ msg: `${deveui} deleted successfully` });
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to delete device' });
   }
 });
 
