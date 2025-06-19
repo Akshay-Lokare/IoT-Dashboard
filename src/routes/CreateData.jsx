@@ -40,7 +40,7 @@ export default function CreateData() {
           device_type: selected.device_type,
           record_type: selected.record_type,
           payload: data.payload,
-          fcount: 1, // or however you're tracking it
+          fcount: 1,
         });
 
         // Simulate motionCount increment and battery drain
@@ -105,10 +105,7 @@ export default function CreateData() {
           ))}
         </select>
 
-
-        <p>email: {user.email}</p>
         <button onClick={handlePayloadCreation} disabled={!selectedDevice}> Generate </button>
-
 
         <p>Payload - {payload || 'null'}</p>
 

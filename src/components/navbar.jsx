@@ -50,6 +50,7 @@ export default function Navbar() {
           {deviceDropdown && (
             <div className="navbar-profile-dropdown-content">
               <a href="/add-device">Add Devices</a>
+              <a href="/all-devices">All Devices</a>
               <a href="/create-data">Create Data</a>
             </div>
           )}

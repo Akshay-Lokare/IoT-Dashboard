@@ -4,6 +4,7 @@ const deviceSchema = new mongoose.Schema({
   deveui: {
     type: String,
     required: true,
+    unique: true
   },
   creatorId: {
     type: String,

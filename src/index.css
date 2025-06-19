@@ -273,8 +273,6 @@
 }
 
 
-
-
 /* Delete Button Style */
 .admin-section button {
   background-color: #ef4444; /* red-500 */
@@ -732,4 +730,208 @@
 
 .not-found-container a:hover {
   text-decoration: underline;
+}
+
+.create-data-page {
+  padding: 2rem;
+  font-family: var(--font-family-base);
+  min-height: 100vh;
+}
+
+.create-data-page h3 {
+  font-size: 1.75rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-dark);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.add-data {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 500px;
+  margin: 0 auto;
+  background-color: var(--color-background);
+  padding: 2rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--box-shadow-md);
+}
+
+.add-data label {
+  font-size: var(--font-size-base);
+  color: var(--color-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.add-data select {
+  background: transparent;
+  border: none;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-secondary);
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  transition: color 0.2s ease;
+  appearance: none;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--box-shadow-md);
+  min-width: 150px;
+}
+
+.add-data select:hover {
+  color: var(--color-primary-dark);
+}
+
+.add-data select:focus {
+  outline: none;
+  color: var(--color-primary-dark);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.add-data button {
+  background-color: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1.25rem;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 1rem;
+}
+
+.add-data button:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+}
+
+.add-data button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.add-data p {
+  font-size: var(--font-size-sm);
+  color: var(--color-secondary);
+}
+
+
+.device-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.device-card {
+  position: relative;
+  background-color: var(--color-surface);
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-md);
+  padding: 2rem 1rem 1.5rem 1rem;
+  width: 240px;
+  box-shadow: var(--box-shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.device-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+.device-info-pair {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-primary-dark);
+  padding: 2px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.device-info-pair:last-child {
+  border-bottom: none;
+  font-size: 0.95rem;
+}
+
+.device-info-pair span {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-secondary);
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+.device-info-pair .value {
+  font-weight: var(--font-weight-normal);
+  text-align: right;
+  flex: 1.2;
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+
+.device-action-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--color-secondary);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.device-action-btn:hover {
+  color: var(--color-primary-dark);
+}
+
+.no-device-msg {
+  font-size: var(--font-size-base);
+  color: var(--color-secondary);
+  text-align: center;
+  margin-top: 2rem;
+  font-style: italic;
+}
+
+.device-dropdown {
+  position: absolute;
+  top: 2.2rem;
+  right: 0.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--box-shadow-md);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+}
+
+.device-dropdown button {
+  background: none;
+  border: none;
+  padding: 0.6rem 1rem;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-secondary);
+  transition: background 0.2s, color 0.2s;
+  border-radius: var(--radius-sm);
+}
+
+.device-dropdown button:hover {
+  background-color: rgb(245, 89, 89);
+  color: white;
+  border-radius: var(--radius-sm);
+}
+
+.device-dropdown .danger:hover {
+  color: var(--color-error);
 }

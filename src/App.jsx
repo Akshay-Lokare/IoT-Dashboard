@@ -9,6 +9,7 @@ import Profile from './routes/Profile';
 import AddDevice from './routes/AddDevice';
 import CreateData from './routes/CreateData';
 import NotFound from './routes/notfound';
+import AllDevices from './routes/AllDevices';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/add-device" element={<AddDevice />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/create-data" element={<CreateData />} />
+        <Route path="/all-devices" element={<AllDevices />} />
       </Routes>
 
       {/* ✅ This renders the toast messages */}

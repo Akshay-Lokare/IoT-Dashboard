@@ -239,6 +239,11 @@ app.post('/add-device', async (req, res) => {
   const { deveui, creatorId, locationTags, device_type, record_type } = req.body;
 
   try {
+    const existingDevice = await DeviceDC.findOne({ deveui });
+    if (existingDevice) {
+      return res.status(409).json({ error: 'Device with this DevEUI already exists' });
+    }
+
     const newDevice = new DeviceDC({
       deveui,
       creatorId,
@@ -249,10 +254,31 @@ app.post('/add-device', async (req, res) => {
 
     await newDevice.save();
     res.status(201).json({ message: 'Device added successfully', device: newDevice });
+
   } catch (error) {
+    console.error('Add device error:', error);
+
+    if (error.code === 11000) {
+      // Duplicate key error (MongoDB error code for duplicate)
+      return res.status(409).json({ error: 'Duplicate DevEUI detected' });
+    }
+
     res.status(500).json({ error: 'Failed to add device' });
   }
 });
+
+
+// delete a device
+app.delete('/delete-device', async (req, res) => {
+  const { deveui } = req.query;
+  try {
+    const deleteDevice = await DeviceDC.deleteOne({ deveui: deveui })
+    res.status(200).json({ msg: `${deveui} deleted successfully` });
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to delete device' });
+  }
+});
+
 
 // Get all devices
 app.get('/devices', async (req, res) => {
@@ -295,7 +321,7 @@ app.get('/device/:id', async (req, res) => {
 
 // Create test motion payload
 app.get('/create-data', (req, res) => {
-  const payload = createInitialMotionEvent();
+  const payload = createInitialMotionEvent(0, 100);
   res.json({ payload });
 });
 
@@ -332,6 +358,20 @@ app.post('/:type/create-data', async (req, res) => {
     res.status(500).json({ error: 'Failed to save motion event' });
   }
 });
+
+// fetch all motion events
+app.get('/motion/all', async (req, res) => {
+  const { email } = req.query;
+
+  try {
+    const events = await motionEvent.find({ creatorId: email });
+    res.json(events);
+    
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch motion events' });
+  }
+});
+
 
 // Start server
 app.listen(PORT, () => {
